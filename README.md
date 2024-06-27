@@ -75,6 +75,11 @@ All the Steps required to setup the cluster is available in the script. Run the 
 ./setupGKE.sh
 ```
 
+<div align="center" id="top">
+  <img src="image/screenshot.png" alt="Agent Habitat" />
+  &#xa0;
+</div>
+
 Follow the prompts to enter the necessary details if they are not already set as environment variables.
 
 ### 4. Deploy the Services or Agent to the cluster
