@@ -53,44 +53,21 @@ Before starting, ensure you have the following:
 
 ## Starting
 
-### 1. Set Up Environment Variables
-
+### 1. Login to Google cloud from the Local Shell
 ```sh
-export PROJECT_ID=<your-google-cloud-project-id>
-export REGION=<your-region> # e.g., us-central1
-export KUBERNETES_CLUSTER_PREFIX=agent-habitat
+gcloud auth login
 ```
+This will open the browser and will ask to authorize.
 
-### 2. Enable Required APIs
+### 2. Clone the repo and get the code.
 
-```sh
-gcloud services enable cloudresourcemanager.googleapis.com compute.googleapis.com container.googleapis.com iamcredentials.googleapis.com gkebackup.googleapis.com
-```
-
-### 3. Grant IAM Roles
-
-```sh
-gcloud projects add-iam-policy-binding $PROJECT_ID --member="user:<your-email>" --role=<role>
-```
-
-Repeat the above command for the following roles:
-
-- roles/storage.objectViewer
-- roles/container.admin
-- roles/iam.serviceAccountAdmin
-- roles/compute.admin
-- roles/gkebackup.admin
-- roles/monitoring.viewer
-
-### 4. Navigate to the Agent Habitat Directory
-
-Ensure you are in the `agent_habitat` directory of the cloned repository:
+Ensure you are in the root directory of the cloned repository:
 
 ```sh
 git clone https://github.com/gatolgaj/agent-habitat.git 
 ```
 
-### 5. Deploy the Agent Habitat Cluster
+### 3. Deploy the Agent Habitat Cluster
 
 All the Steps required to setup the cluster is available in the script. Run the deployment script:
 
@@ -100,7 +77,7 @@ All the Steps required to setup the cluster is available in the script. Run the 
 
 Follow the prompts to enter the necessary details if they are not already set as environment variables.
 
-### 6. Deploy the Services or Agent to the cluster
+### 4. Deploy the Services or Agent to the cluster
 
 With the cluster ready for production use, we can proceed to deploy our services to it. Follow the steps below to deploy a RAG (Retrieval-Augmented Generation) agent, which includes two services.
 
