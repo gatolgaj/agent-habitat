@@ -24,6 +24,8 @@
 
 <br>
 
+**Important: This README is still WIP. If you encounter any issues in setup , please raise an issue**
+
 ## About
 
 Agent Habitat is a platform to build and deploy Generative AI (GenAI) agents or applications on Google Kubernetes Engine (GKE). All applications are containerized using Docker and have access to a shared Qdrant cluster for vector similarity search.
@@ -115,7 +117,7 @@ gcloud auth configure-docker
  2. Create the GCR repository:
 
 ```sh
-gcloud artifacts repositories create agent-habitat-repo –repository-format=docker –location=<region>
+gcloud artifacts repositories create agent-habitat –repository-format=docker –location=<region>
 ```
 
 2. Build and Push Docker Images
@@ -167,6 +169,7 @@ Once the services are deployed you can find the endpoint using
 
 ```sh
 kubectl get svc -n  <KUBERNETES_CLUSTER_PREFIX>
+kubectl describe svc <SERVICE_NAME> -n <NAMESPACE>
 ```
 You can Navigate to the link and chat with the App.
 
@@ -192,13 +195,11 @@ Follow the prompts to enter the necessary details if they are not already set as
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE.md) file for details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details. All the Other Licences as per the file.
 
 ## Authors
 
-Made with :heart: by Deloitte Consulting BV -- Amsterdam, Netherlands
-
-Authors: Shyam Sundar
+Author: Shyam Sundar , based on the samples from google.
 
 &#xa0;
 
