@@ -1,4 +1,4 @@
-<div align="center" id="top"> 
+<div align="center" id="top">
   <img src="image/logo.png" alt="Agent Habitat" width="300px"/>
   &#xa0;
 </div>
@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <a href="#about">About</a> &#xa0; | &#xa0; 
+  <a href="#about">About</a> &#xa0; | &#xa0;
   <a href="#technologies">Technologies</a> &#xa0; | &#xa0;
   <a href="#requirements">Requirements</a> &#xa0; | &#xa0;
   <a href="#starting">Starting</a> &#xa0; | &#xa0;
@@ -72,6 +72,7 @@ gcloud projects add-iam-policy-binding $PROJECT_ID --member="user:<your-email>" 
 ```
 
 Repeat the above command for the following roles:
+
 - roles/storage.objectViewer
 - roles/container.admin
 - roles/iam.serviceAccountAdmin
@@ -96,6 +97,79 @@ All the Steps required to setup the cluster is available in the script. Run the 
 ```
 
 Follow the prompts to enter the necessary details if they are not already set as environment variables.
+
+### 6. Deploy the Services or Agent to the cluster
+
+With the cluster ready for production use, we can proceed to deploy our services to it. Follow the steps below to deploy a RAG (Retrieval-Augmented Generation) agent, which includes two services.
+
+#### Step 1: Create a Google Container Registry Repository
+
+Before pushing your Docker images, ensure that the Google Container Registry (GCR) repository is set up.
+
+ 1. Set up authentication for Docker to use Google Container Registry:
+
+```sh
+gcloud auth configure-docker
+```
+
+ 2. Create the GCR repository:
+
+```sh
+gcloud artifacts repositories create agent-habitat-repo –repository-format=docker –location=<region>
+```
+
+2. Build and Push Docker Images
+
+First, we need to build and push the Docker images for the services.
+
+ 1. Build and Push the Document Embedder Docker Image:
+Navigate to the docker/embed-docs directory, build the Docker image, and push it to the Google Container Registry.
+
+```sh
+cd docker/embed-docs
+docker build -t gcr.io/$PROJECT_ID/agent-habitat/embed-docs:1.0 .
+docker push gcr.io/$PROJECT_ID/agent-habitat/embed-docs:1.0
+```
+
+ 2. Build and Push the Chatbot Docker Image:
+Navigate to the docker/chatbot directory, build the Docker image, and push it to the Google Container Registry.
+
+```sh
+cd docker/chatbot
+docker build -t gcr.io/$PROJECT_ID/agent-habitat/chatbot:1.0 .
+docker push gcr.io/$PROJECT_ID/agent-habitat/chatbot:1.0
+```
+
+3. Create a Service Account
+
+Create a service account. Ensure that you update the file with the appropriate service account user and then run the command:
+
+```sh
+kubectl apply -n <KUBERNETES_CLUSTER_PREFIX> -f manifests/05-rag/service-account.yaml
+```
+
+4. Deploy the Document Embedder Service
+
+As a part of our RAG agent, deploy the document embedder service. This service listens for events when a file is uploaded to a bucket. Upon detecting an upload, the service processes the file and stores it in the Qdrant database.
+
+```sh
+kubectl apply -n <KUBERNETES_CLUSTER_PREFIX> -f manifests/05-rag/doc-embedder.yaml
+```
+
+5. Deploy the Chatbot Service
+
+Next, deploy the chatbot service, which implements Retrieval-Augmented Generation (RAG). This service performs vector searches on the Qdrant database to answer users’ questions. It utilizes Google Vertex AI Gemini pro models for enhanced responses.
+
+```sh
+kubectl apply -n <KUBERNETES_CLUSTER_PREFIX> -f manifests/05-rag/chatbot.yaml
+```
+Once the services are deployed you can find the endpoint using 
+
+```sh
+kubectl get svc -n  <KUBERNETES_CLUSTER_PREFIX>
+```
+You can Navigate to the link and chat with the App.
+
 
 ## Teardown
 
