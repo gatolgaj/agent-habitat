@@ -17,7 +17,7 @@ kind: Deployment
 metadata:
   name: embed-docs
   labels: &labels
-    app: qdrant-docs-embedder
+    app: gke-docs-embedder
 spec:
   selector:
     matchLabels: *labels
@@ -28,14 +28,20 @@ spec:
       serviceAccountName: embed-docs-sa
       containers:
       - name: embed-docs
-        image: europe-west4-docker.pkg.dev/dttl-nl-genai-sandbox/swg/embed-docs:1.0
+        image: europe-west4-docker.pkg.dev/dttl-nl-genai-sandbox/agent-habitat/embed-docs:1.0
         imagePullPolicy: Always
         command: ["python", "/app/endpoint.py"]
         env:
         - name: QDRANT_URL
           value: http://qdrant-database:6333
+        - name: WEAVIATE_URL
+          value: http://weaviate-database
+        - name: WEAVIATE_HTTP_PORT
+          value: 8080
+        - name: WEAVIATE_GRPC_PORT
+          value: 50051    
         - name: JOB_IMAGE
-          value: europe-west4-docker.pkg.dev/dttl-nl-genai-sandbox/swg/embed-docs:1.0
+          value: europe-west4-docker.pkg.dev/dttl-nl-genai-sandbox/agent-habitat/embed-docs:1.0
         - name: APIKEY
           valueFrom:
             secretKeyRef:
@@ -52,7 +58,7 @@ kind: Service
 metadata:
   name: embed-docs
   labels: &labels
-    app: qdrant-docs-embedder
+    app: gke-docs-embedder
 spec:
   type: ClusterIP
   ports:

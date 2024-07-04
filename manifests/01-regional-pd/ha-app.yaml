@@ -16,8 +16,8 @@
 kind: HighAvailabilityApplication
 apiVersion: ha.gke.io/v1
 metadata:
-  name: qdrant-database
-  namespace: qdrant
+  name: weaviate-database
+  namespace: habitat
 spec:
   resourceSelection:
     resourceKind: StatefulSet

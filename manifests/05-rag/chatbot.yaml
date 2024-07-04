@@ -17,7 +17,7 @@ kind: Deployment
 metadata:
   name: chatbot
   labels: &labels
-    app: qdrant-chatbot
+    app: gke-chatbot
 spec:
   selector:
     matchLabels: *labels
@@ -28,7 +28,7 @@ spec:
       serviceAccountName: embed-docs-sa
       containers:
       - name: chatbot
-        image: europe-west4-docker.pkg.dev/dttl-nl-genai-sandbox/swg/chatbot:1.0
+        image: europe-west4-docker.pkg.dev/dttl-nl-genai-sandbox/agent-habitat/chatbot:1.0
         imagePullPolicy: Always
         resources:
           requests:
@@ -43,12 +43,16 @@ spec:
             secretKeyRef:
               name: qdrant-database-apikey
               key: api-key
-        - name: QDRANT_URL
-          value: http://qdrant-database:6333
+        - name: WEAVIATE_URL
+          value: http://weaviate-database
+        - name: WEAVIATE_HTTP_PORT
+          value: 8080
+        - name: WEAVIATE_GRPC_PORT
+          value: 50051
         - name: STREAMLIT_SERVER_PORT
           value: "80"
         - name: COLLECTION_NAME
-          value: "training-docs"
+          value: "trainingDocs"
         ports:
         - containerPort: 80
         resources:
@@ -60,7 +64,7 @@ kind: Service
 metadata:
   name: chatbot
   labels: &labels
-    app: qdrant-chatbot
+    app: gke-chatbot
 spec:
   # type: ClusterIP
   type: LoadBalancer

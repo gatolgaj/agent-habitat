@@ -56,7 +56,7 @@ module "project-iam-bindings-bucket" {
 
   bindings = {
     "roles/aiplatform.user"          = ["serviceAccount:${var.cluster_prefix}-bucket-access@${var.project_id}.iam.gserviceaccount.com"] 
-    "roles/iam.workloadIdentityUser" = ["serviceAccount:${var.project_id}.svc.id.goog[qdrant/embed-docs-sa]"] 
+    "roles/iam.workloadIdentityUser" = ["serviceAccount:${var.project_id}.svc.id.goog[habitat/embed-docs-sa]"] 
   } 
 
   depends_on = [module.service-account-bucket]

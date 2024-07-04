@@ -23,6 +23,6 @@ variable "region" {
 
 variable "cluster_prefix" {
   description = "The prefix of existing GKE cluster"
-  default     = "qdrant"
+  default     = "habitat"
 }
 

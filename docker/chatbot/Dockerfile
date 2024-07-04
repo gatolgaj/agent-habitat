@@ -1,7 +1,10 @@
 FROM python:3.12-slim-bookworm
 
 ENV QDRANT_URL http://qdrant-database:6333
-ENV COLLECTION_NAME training-docs
+ENV WEAVIATE_URL host.docker.internal
+ENV WEAVIATE_HTTP_PORT 8080
+ENV WEAVIATE_GRPC_PORT 50051
+ENV COLLECTION_NAME trainingDocs
 RUN apt update && \
     apt install -y --no-install-recommends gcc libc6-dev && \
     rm -rf /var/lib/apt/lists/*

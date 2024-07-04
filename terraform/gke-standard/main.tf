@@ -21,7 +21,7 @@ module "network" {
 }
 
 # [START gke_qdrant_standard_private_regional_cluster]
-module "qdrant_cluster" {
+module "agent_cluster" {
   source                   = "../modules/cluster"
   project_id               = var.project_id
   region                   = var.region
@@ -31,7 +31,7 @@ module "qdrant_cluster" {
 
   node_pools = [
     {
-      name            = "pool-qdrant"
+      name            = "pool-habitat"
       disk_size_gb    = var.node_disk_size
       disk_type       = var.node_disk_type
       autoscaling     = true
@@ -45,16 +45,16 @@ module "qdrant_cluster" {
   ]
   node_pools_labels = {
     all = {}
-    pool-qdrant = {
-      "app.stateful/component" = "qdrant"
+    pool-habitat = {
+      "app.stateful/component" = "habitat"
     }
   }
   node_pools_taints = {
     all = []
-    pool-qdrant = [
+    pool-habitat = [
       {
         key    = "app.stateful/component"
-        value  = "qdrant"
+        value  = "habitat"
         effect = "NO_SCHEDULE"
       }
     ]

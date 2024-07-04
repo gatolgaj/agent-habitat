@@ -32,7 +32,7 @@ resource "google_eventarc_trigger" "trigger" {
     gke {
       cluster   = "${var.cluster_prefix}-cluster"
       location  = var.region
-      namespace = "qdrant"
+      namespace = "habitat"
       path      = "/"
       service   = "embed-docs"
     }

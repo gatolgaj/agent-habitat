@@ -21,7 +21,7 @@ module "network" {
 }
 
 # [START gke_qdrant_autopilot_private_regional_cluster]
-module "qdrant_cluster" {
+module "agent_cluster" {
   source                   = "../modules/cluster-autopilot"
   project_id               = var.project_id
   region                   = var.region

@@ -20,6 +20,17 @@ from langchain_community.vectorstores import Qdrant
 from qdrant_client import QdrantClient
 import streamlit as st
 import os
+import weaviate
+from weaviate.auth import AuthApiKey
+from langchain.document_loaders import TextLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from vertexai.language_models import TextEmbeddingInput, TextEmbeddingModel
+from typing import List, Optional
+import weaviate.classes as wvc
+from google.cloud import storage
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # [START gke_databases_qdrant_docker_chat_model]
 vertexAI = ChatVertexAI(model_name="gemini-pro", streaming=True, convert_system_message_to_human=True)
@@ -47,19 +58,46 @@ prompt_template = ChatPromptTemplate.from_messages(
     ]
 )
 
-embedding_model = VertexAIEmbeddings("textembedding-gecko@001")
-# [END gke_databases_qdrant_docker_chat_model]
+# embedding_model = VertexAIEmbeddings("textembedding-gecko@001")
+# # [END gke_databases_qdrant_docker_chat_model]
 
-# [START gke_databases_qdrant_docker_chat_client]
-client = QdrantClient(
-    url=os.getenv("QDRANT_URL"),
-    api_key=os.getenv("APIKEY"),
-)
+# # [START gke_databases_qdrant_docker_chat_client]
+# client = QdrantClient(
+#     url=os.getenv("QDRANT_URL"),
+#     api_key=os.getenv("APIKEY"),
+# )
 collection_name = os.getenv("COLLECTION_NAME")
-qdrant = Qdrant(client, collection_name, embeddings=embedding_model)
+    # Connect to Weaviate instance
+weaviate_url = os.getenv("WEAVIATE_URL")
+weaviate_http_port = os.getenv("WEAVIATE_HTTP_PORT")
+weaviate_grpc_port = os.getenv("WEAVIATE_GRPC_PORT")
+
+# Check if environment variables are set
+if not weaviate_url or not weaviate_http_port or not weaviate_grpc_port:
+    raise ValueError("Ensure WEAVIATE_URL, WEAVIATE_HTTP_PORT, and WEAVIATE_GRPC_PORT are set in the .env file")
+
+# Connect to Weaviate instance
+client = weaviate.connect_to_custom(
+    http_host=weaviate_url,  # URL only, no http prefix
+    http_port=int(weaviate_http_port),
+    http_secure=False,  # Set to True if https
+    grpc_host=weaviate_url,
+    grpc_port=int(weaviate_grpc_port),  # Default is 50051, WCD uses 443
+    grpc_secure=False,  # Edit as needed
+)
+docCollection = client.collections.get(collection_name)
+# qdrant = Qdrant(client, collection_name, embeddings=embedding_model)
 # [END gke_databases_qdrant_docker_chat_client]
 def format_docs(docs):
-    return "\n\n".join([d.page_content for d in docs])
+    return "\n\n".join([d.properties['text'] for d in docs.objects])
+
+def embed_text(texts: List[str], task: str = "RETRIEVAL_DOCUMENT", model_name: str = "text-embedding-004", dimensionality: Optional[int] = 256) -> List[List[float]]:
+    """Embeds texts with a pre-trained, foundational model."""
+    model = TextEmbeddingModel.from_pretrained(model_name)
+    inputs = [TextEmbeddingInput(text, task) for text in texts]
+    kwargs = dict(output_dimensionality=dimensionality) if dimensionality else {}
+    embeddings = model.get_embeddings(inputs, **kwargs)
+    return [embedding.values for embedding in embeddings]
 
 st.title("🤖 Chatbot")
 if "messages" not in st.session_state:
@@ -83,7 +121,12 @@ if chat_input := st.chat_input():
         st.write(chat_input)
         st.session_state.messages.append({"role": "human", "content": chat_input})
 
-    found_docs = qdrant.similarity_search(chat_input)
+    chat_input_vector = embed_text([chat_input])[0]
+    found_docs = docCollection.query.near_vector(
+        near_vector=chat_input_vector,
+        limit=2,
+        return_metadata=wvc.query.MetadataQuery(certainty=True)
+    )
     context = format_docs(found_docs)
 
     prompt_value = prompt_template.format_messages(name="Bob", query=chat_input, context=context, history=st.session_state.memory.load_memory_variables({}))
