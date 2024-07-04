@@ -37,9 +37,11 @@ spec:
         - name: WEAVIATE_URL
           value: http://weaviate-database
         - name: WEAVIATE_HTTP_PORT
-          value: 8080
+          value: "8080"
+        - name: WEAVIATE_URL_GRPC
+          value: http://weaviate-grpc           
         - name: WEAVIATE_GRPC_PORT
-          value: 50051    
+          value: "50051"    
         - name: JOB_IMAGE
           value: europe-west4-docker.pkg.dev/dttl-nl-genai-sandbox/agent-habitat/embed-docs:1.0
         - name: APIKEY

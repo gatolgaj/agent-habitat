@@ -71,17 +71,18 @@ collection_name = os.getenv("COLLECTION_NAME")
 weaviate_url = os.getenv("WEAVIATE_URL")
 weaviate_http_port = os.getenv("WEAVIATE_HTTP_PORT")
 weaviate_grpc_port = os.getenv("WEAVIATE_GRPC_PORT")
+weaviate_url_grpc = os.getenv("WEAVIATE_URL_GRPC")
 
 # Check if environment variables are set
-if not weaviate_url or not weaviate_http_port or not weaviate_grpc_port:
-    raise ValueError("Ensure WEAVIATE_URL, WEAVIATE_HTTP_PORT, and WEAVIATE_GRPC_PORT are set in the .env file")
+if not weaviate_url or not weaviate_http_port or not weaviate_grpc_port or not weaviate_url_grpc:
+    raise ValueError("Ensure WEAVIATE_URL, WEAVIATE_HTTP_PORT, WEAVIATE_URL_GRPC and WEAVIATE_GRPC_PORT  are set in the .env file")
 
 # Connect to Weaviate instance
 client = weaviate.connect_to_custom(
     http_host=weaviate_url,  # URL only, no http prefix
     http_port=int(weaviate_http_port),
     http_secure=False,  # Set to True if https
-    grpc_host=weaviate_url,
+    grpc_host=weaviate_url_grpc,
     grpc_port=int(weaviate_grpc_port),  # Default is 50051, WCD uses 443
     grpc_secure=False,  # Edit as needed
 )
