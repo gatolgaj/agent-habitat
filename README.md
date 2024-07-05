@@ -28,7 +28,7 @@
 
 ## About
 
-Agent Habitat is a platform to build and deploy Generative AI (GenAI) agents or applications on Google Kubernetes Engine (GKE). All applications are containerized using Docker and have access to a shared Qdrant cluster for vector similarity search.
+Agent Habitat is a platform to build and deploy Generative AI (GenAI) agents or applications on Google Kubernetes Engine (GKE). All applications are containerized using Docker and have access to a shared Weaviate cluster for vector similarity search.
 
 ## Technologies
 
@@ -135,7 +135,7 @@ kubectl apply -n $KUBERNETES_CLUSTER_PREFIX -f manifests/05-rag/service-account.
 
 4. Deploy the Document Embedder Service
 
-As a part of our RAG agent, deploy the document embedder service. This service listens for events when a file is uploaded to a bucket. Upon detecting an upload, the service processes the file and stores it in the Qdrant database.
+As a part of our RAG agent, deploy the document embedder service. This service listens for events when a file is uploaded to a bucket. Upon detecting an upload, the service processes the file and stores it in the Weaviate database.
 
 ```sh
 kubectl apply -n <KUBERNETES_CLUSTER_PREFIX> -f manifests/05-rag/doc-embedder.yaml
@@ -149,7 +149,7 @@ kubectl apply -n <KUBERNETES_CLUSTER_PREFIX> -f manifests/05-rag/doc-embedder.ya
 
 6. Deploy the Chatbot Service
 
-Next, deploy the chatbot service, which implements Retrieval-Augmented Generation (RAG). This service performs vector searches on the Qdrant database to answer users’ questions. It utilizes Google Vertex AI Gemini pro models for enhanced responses.
+Next, deploy the chatbot service, which implements Retrieval-Augmented Generation (RAG). This service performs vector searches on the Weaviate database to answer users’ questions. It utilizes Google Vertex AI Gemini pro models for enhanced responses.
 
 ```sh
 kubectl apply -n <KUBERNETES_CLUSTER_PREFIX> -f manifests/05-rag/chatbot.yaml
