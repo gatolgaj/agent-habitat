@@ -38,17 +38,12 @@ spec:
             memory: "1Gi"
             cpu: "1"
         env:
-        - name: APIKEY
-          valueFrom:
-            secretKeyRef:
-              name: qdrant-database-apikey
-              key: api-key
         - name: WEAVIATE_URL
-          value: http://weaviate
+          value: weaviate
         - name: WEAVIATE_HTTP_PORT
-          value: "8080"
+          value: "80"
         - name: WEAVIATE_URL_GRPC
-          value: http://weaviate-grpc          
+          value: weaviate-grpc          
         - name: WEAVIATE_GRPC_PORT
           value: "50051"
         - name: STREAMLIT_SERVER_PORT
