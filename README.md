@@ -3,7 +3,7 @@
   &#xa0;
 </div>
 
-<h1 align="center">Agent Habitat - Deploy GenAI Agents or Applications on GKE</h1>
+<h1 align="center">Agent Habitat - Deploy GenAI Agents or Applications on GKE (With Weaviate)</h1>
 
 <p align="center">
   <img alt="Github top language" src="https://img.shields.io/github/languages/top/gatolgaj/agent-habitat?color=56BEB8">
@@ -38,7 +38,7 @@ The following tools were used in this project:
 - [Google Cloud SDK (gcloud)](https://cloud.google.com/sdk/docs/install)
 - [Terraform](https://www.terraform.io/)
 - [Helm](https://helm.sh/)
-- [Qdrant](https://qdrant.tech/)
+- [Weaviate](https://weaviate.io/)
 
 ## Requirements
 
@@ -81,6 +81,7 @@ The the manifest files are written with `KUBERNETES_CLUSTER_PREFIX` as `habitat`
 </div>
 
 Follow the prompts to enter the necessary details if they are not already set as environment variables.
+Note : This is Still WIP. Its better run the commands in the batch file one by one. 
 
 ### 4. Deploy the Services or Agent to the cluster
 
