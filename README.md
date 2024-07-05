@@ -74,7 +74,7 @@ All the Steps required to setup the cluster is available in the script. Run the 
 ```sh
 ./setupGKE.sh
 ```
-
+The the manifest files are written with `KUBERNETES_CLUSTER_PREFIX` as `habitat`. If you are using any other prefix , you will have to change the manifest files.
 <div align="center" id="top">
   <img src="image/screenshot.png" alt="Agent Habitat" />
   &#xa0;
@@ -93,7 +93,7 @@ Before pushing your Docker images, ensure that the Google Container Registry (GC
  1. Set up authentication for Docker to use Google Container Registry:
 
 ```sh
-gcloud auth configure-docker
+gcloud auth configure-docker $REGION.-docker.pkg.dev
 ```
 
  2. Create the GCR repository:
@@ -111,7 +111,7 @@ Navigate to the docker/embed-docs directory, build the Docker image, and push it
 
 ```sh
 cd docker/embed-docs
-docker build -t gcr.io/$PROJECT_ID/agent-habitat/embed-docs:1.0 .
+docker build --platform linux/amd64 -t gcr.io/$PROJECT_ID/agent-habitat/embed-docs:1.0 .
 docker push gcr.io/$PROJECT_ID/agent-habitat/embed-docs:1.0
 ```
 
@@ -120,16 +120,16 @@ Navigate to the docker/chatbot directory, build the Docker image, and push it to
 
 ```sh
 cd docker/chatbot
-docker build -t gcr.io/$PROJECT_ID/agent-habitat/chatbot:1.0 .
+docker build --platform linux/amd64 -t gcr.io/$PROJECT_ID/agent-habitat/chatbot:1.0 .
 docker push gcr.io/$PROJECT_ID/agent-habitat/chatbot:1.0
 ```
 
 3. Create a Service Account
 
-Create a service account. Ensure that you update the file with the appropriate service account user and then run the command:
+Create a service account. Ensure that you update the file with the appropriate service account user(Find  ` iam.gke.io/gcp-service-account` in the `manifests/05-rag/service-account.yaml`file and update it to `<KUBERNETES_CLUSTER_PREFIX>-bucket-access@<PROJECT_ID>.iam.gserviceaccount.com`) and then run the command:
 
 ```sh
-kubectl apply -n <KUBERNETES_CLUSTER_PREFIX> -f manifests/05-rag/service-account.yaml
+kubectl apply -n $KUBERNETES_CLUSTER_PREFIX -f manifests/05-rag/service-account.yaml
 ```
 
 4. Deploy the Document Embedder Service
@@ -139,8 +139,14 @@ As a part of our RAG agent, deploy the document embedder service. This service l
 ```sh
 kubectl apply -n <KUBERNETES_CLUSTER_PREFIX> -f manifests/05-rag/doc-embedder.yaml
 ```
+5. Deploy the Cloud Storage and EventArc 
 
-5. Deploy the Chatbot Service
+This will make sure that when a File is Uploaded to the Designated Bucket (`<PROJECT_ID>-<KUBERNETES_CLUSTER_PREFIX>-training-docs`), it triggers the embed-doc service.
+```sh
+kubectl apply -n <KUBERNETES_CLUSTER_PREFIX> -f manifests/05-rag/doc-embedder.yaml
+```
+
+6. Deploy the Chatbot Service
 
 Next, deploy the chatbot service, which implements Retrieval-Augmented Generation (RAG). This service performs vector searches on the Qdrant database to answer users’ questions. It utilizes Google Vertex AI Gemini pro models for enhanced responses.
 

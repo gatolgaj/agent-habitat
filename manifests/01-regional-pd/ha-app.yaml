@@ -16,7 +16,7 @@
 kind: HighAvailabilityApplication
 apiVersion: ha.gke.io/v1
 metadata:
-  name: weaviate-database
+  name: weaviate
   namespace: habitat
 spec:
   resourceSelection:

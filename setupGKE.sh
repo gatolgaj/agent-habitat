@@ -39,7 +39,7 @@ else
 fi
 
 if [ -z "$KUBERNETES_CLUSTER_PREFIX" ]; then
-  KUBERNETES_CLUSTER_PREFIX=$(prompt "🔧 Enter the Kubernetes cluster prefix (e.g., qdrant)")
+  KUBERNETES_CLUSTER_PREFIX=$(prompt "🔧 Enter the Kubernetes cluster prefix (e.g., weaviate)")
 else
   verbose_message "🔧 Using existing KUBERNETES_CLUSTER_PREFIX: $KUBERNETES_CLUSTER_PREFIX"
 fi
@@ -86,16 +86,20 @@ if [ $? -ne 0 ]; then
   curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 fi
 
-# Assume the script is already in the qdrant directory
-QDRANT_DIR=$(pwd)
-verbose_message "📂 Current directory is $QDRANT_DIR"
+# Assume the script is already in the weaviate directory
+ROOT_DIR=$(pwd)
+verbose_message "📂 Current directory is $ROOT_DIR"
 
 # Create cluster infrastructure
-verbose_message "🏗️ Creating cluster infrastructure..."
+verbose_message "🏗️ Creating cluster infrastructure and enabling Stateful Set... This will take 10 mins"
 export GOOGLE_OAUTH_ACCESS_TOKEN=$(gcloud auth print-access-token)
 
-terraform -chdir=terraform/gke-autopilot init
-terraform -chdir=terraform/gke-autopilot apply -var project_id=${PROJECT_ID} -var region=${REGION} -var cluster_prefix=${KUBERNETES_CLUSTER_PREFIX}
+terraform -chdir=terraform/gke-standard init
+terraform -chdir=terraform/gke-standard apply -var project_id=${PROJECT_ID} -var region=${REGION} -var cluster_prefix=${KUBERNETES_CLUSTER_PREFIX}
+gcloud container clusters update ${KUBERNETES_CLUSTER_PREFIX}-cluster \
+    --project=${PROJECT_ID} \
+    --region=${REGION} \
+    --update-addons=StatefulHA=ENABLED
 
 # Connect to the cluster
 verbose_message "🔗 Connecting to the cluster..."
@@ -103,25 +107,25 @@ gcloud container clusters get-credentials ${KUBERNETES_CLUSTER_PREFIX}-cluster -
 
 # Add Helm repository and create namespace
 verbose_message "📦 Adding Helm repository and creating namespace..."
-helm repo add qdrant https://qdrant.github.io/qdrant-helm
+helm repo add weaviate https://weaviate.github.io/weaviate-helm
 kubectl create ns ${KUBERNETES_CLUSTER_PREFIX}
 
 # Create regional persistent SSD disk StorageClass
 verbose_message "💾 Creating regional persistent SSD disk StorageClass..."
 kubectl apply -n ${KUBERNETES_CLUSTER_PREFIX} -f manifests/01-regional-pd/regional-pd.yaml
 
-# Deploy Qdrant and metrics configurations
-verbose_message "🚀 Deploying Qdrant and metrics configurations..."
-kubectl apply -n ${KUBERNETES_CLUSTER_PREFIX} -f manifests/03-prometheus-metrics/metrics-cm.yaml
-helm install qdrant-database qdrant/qdrant -n ${KUBERNETES_CLUSTER_PREFIX} -f manifests/02-values-file/values.yaml
+# Deploy Weaviate and metrics configurations
+verbose_message "🚀 Deploying Weaviate "
+# kubectl apply -n ${KUBERNETES_CLUSTER_PREFIX} -f manifests/03-prometheus-metrics/metrics-cm.yaml
+helm install weaviate-database weaviate/weaviate -n ${KUBERNETES_CLUSTER_PREFIX} -f manifests/02-values-file/values-weaviate.yaml
 kubectl apply -n ${KUBERNETES_CLUSTER_PREFIX} -f manifests/01-regional-pd/ha-app.yaml
 
 # Create PodMonitoring resource
-verbose_message "📊 Creating PodMonitoring resource..."
-kubectl apply -n ${KUBERNETES_CLUSTER_PREFIX} -f manifests/03-prometheus-metrics/pod-monitoring.yaml
+# verbose_message "📊 Creating PodMonitoring resource..."
+# kubectl apply -n ${KUBERNETES_CLUSTER_PREFIX} -f manifests/03-prometheus-metrics/pod-monitoring.yaml
 
 # Create Cloud Monitoring dashboard
-verbose_message "📈 Creating Cloud Monitoring dashboard..."
-gcloud --project "${PROJECT_ID}" monitoring dashboards create --config-from-file monitoring/dashboard.json
+# verbose_message "📈 Creating Cloud Monitoring dashboard..."
+# gcloud --project "${PROJECT_ID}" monitoring dashboards create --config-from-file monitoring/dashboard.json
 
-verbose_message "🎉 Qdrant deployment on GKE is complete! 🎉"
+verbose_message "🎉 Weaviate deployment on GKE is complete! 🎉"
